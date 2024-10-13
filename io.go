@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func createFileMap(rootDir string) (map[string]string, error) {
+func createFileMap(rootDir string, ignoredPaths []string) (map[string]string, error) {
 
 	filesMap := make(map[string]string)
 
@@ -18,7 +18,7 @@ func createFileMap(rootDir string) (map[string]string, error) {
 			return err
 		}
 
-		if !info.IsDir() {
+		if !info.IsDir() && !isIgnoredPath(path, ignoredPaths) {
 
 			body, err := os.ReadFile(path)
 
@@ -27,7 +27,7 @@ func createFileMap(rootDir string) (map[string]string, error) {
 				return err
 
 			}
-
+			filesSize[path] = info.Size()
 			filesMap[path] = string(body)
 		}
 
@@ -43,6 +43,15 @@ func createFileMap(rootDir string) (map[string]string, error) {
 
 	return filesMap, nil
 
+}
+
+func isIgnoredPath(path string, ignoredPaths []string) bool {
+	for _, ignoredPath := range ignoredPaths {
+		if strings.Contains(path, ignoredPath) {
+			return true
+		}
+	}
+	return false
 }
 
 func matchesFilter(path, filter, content string) bool {
