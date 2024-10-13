@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -63,7 +65,7 @@ func configureTable(table *tview.Table, app *tview.Application, inputField *tvie
 	})
 
 	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-
+		// if user press enter key or / slash key
 		if event.Key() == tcell.KeyEnter {
 
 			path := table.GetCell(table.GetSelection()).Text
@@ -74,8 +76,9 @@ func configureTable(table *tview.Table, app *tview.Application, inputField *tvie
 
 		}
 
-		if event.Key() == tcell.KeyEsc {
+		if event.Key() == tcell.KeyEsc || event.Rune() == '/' {
 			app.SetFocus(inputField)
+			inputField.SetText("")
 		}
 
 		return event
@@ -91,29 +94,45 @@ func configureInputField(table *tview.Table, row int, filesMap map[string]string
 		NewInputField().
 		SetChangedFunc(func(text string) {
 
-			table.Clear()
-			row = 0
+			if !strings.HasPrefix(text, ":") {
 
-			for path := range filesMap {
+				table.Clear()
+				row = 0
 
-				if matchesFilter(path, text, filesMap[path]) {
+				for path := range filesMap {
 
-					table.SetCell(
-						row,
-						0,
-						tview.
-							NewTableCell(path).
-							SetTextColor(tcell.ColorWhiteSmoke).
-							SetSelectable(true),
-					)
+					if matchesFilter(path, text, filesMap[path]) {
 
-					row++
+						table.SetCell(
+							row,
+							0,
+							tview.
+								NewTableCell(path).
+								SetTextColor(tcell.ColorWhiteSmoke).
+								SetSelectable(true),
+						)
+
+						row++
+					}
 				}
 			}
+
 		})
 
 	inputField.SetDoneFunc(func(key tcell.Key) {
+
 		if key == tcell.KeyEnter {
+
+			switch inputField.GetText() {
+
+			case ":q":
+				app.Stop()
+				return
+			case ":quit":
+				app.Stop()
+				return
+			default:
+			}
 
 			app.SetFocus(table)
 
