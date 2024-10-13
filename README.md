@@ -1,5 +1,6 @@
 # files viewer
 Manage your files via terminal
 
-![image](https://github.com/user-attachments/assets/99f68869-57df-47b0-9d16-91874b97d5b0)
+![image](https://github.com/user-attachments/assets/826f7219-c372-46f5-8f18-2cf3b42adaf7)
+
 
