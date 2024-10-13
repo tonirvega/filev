@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -14,14 +16,39 @@ func startView(app *tview.Application, filesMap map[string]string) bool {
 	table.SetSelectable(true, false)
 	row := 0
 
+	inputField := configureInputField(table, row, filesMap, app)
+
+	configureTable(table, app, inputField)
+
+	for path := range filesMap {
+		table.SetCell(row, 0, tview.NewTableCell(path).SetTextColor(tcell.ColorWhiteSmoke).SetSelectable(true))
+		row++
+	}
+
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(inputField, 3, 1, false).
+		AddItem(table, 0, 10, true)
+
+	if err := app.SetRoot(flex, true).Run(); err != nil {
+		panic(err)
+	}
+
+	return false
+}
+
+func configureTable(table *tview.Table, app *tview.Application, inputField *tview.InputField) {
+
 	table.SetSelectionChangedFunc(func(row, column int) {
 
 		for i := 0; i < table.GetRowCount(); i++ {
 			cell := table.GetCell(i, 0)
 			if i == row {
 				cell.SetTextColor(tcell.ColorBlue).SetAttributes(tcell.AttrBold)
+				cell.SetBackgroundColor(tcell.ColorWhiteSmoke)
 			} else {
 				cell.SetTextColor(tcell.ColorWhiteSmoke).SetAttributes(tcell.AttrNone)
+				cell.SetBackgroundColor(tcell.ColorBlack)
 			}
 		}
 	})
@@ -32,25 +59,51 @@ func startView(app *tview.Application, filesMap map[string]string) bool {
 
 			path := table.GetCell(table.GetSelection()).Text
 
-			app.Suspend(func() {
+			app.Suspend(func() { openWithVim(path) })
 
-				openWithVim(path)
+		}
 
-			})
-
-			return event
+		if event.Key() == tcell.KeyEsc {
+			app.SetFocus(inputField)
 		}
 
 		return event
+
 	})
 
-	for path := range filesMap {
-		table.SetCell(row, 0, tview.NewTableCell(path).SetTextColor(tcell.ColorWhiteSmoke).SetSelectable(true))
-		row++
-	}
+}
 
-	if err := app.SetRoot(table, true).Run(); err != nil {
-		panic(err)
-	}
-	return false
+func configureInputField(table *tview.Table, row int, filesMap map[string]string, app *tview.Application) *tview.InputField {
+
+	inputField := tview.NewInputField().
+		SetChangedFunc(func(text string) {
+			table.Clear()
+			row = 0
+			for path := range filesMap {
+				if text == "" || strings.Contains(strings.ToLower(path), strings.ToLower(text)) || strings.Contains(strings.ToLower(filesMap[path]), strings.ToLower(text)) {
+					table.SetCell(
+						row,
+						0,
+						tview.NewTableCell(path).
+							SetTextColor(tcell.ColorWhiteSmoke).
+							SetSelectable(true),
+					)
+					row++
+				}
+			}
+		})
+
+	inputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			app.SetFocus(table)
+
+			table.Select(0, 0)
+		}
+	})
+
+	inputField.
+		SetBorder(true).
+		SetBorderColor(tcell.ColorWhiteSmoke)
+
+	return inputField
 }
