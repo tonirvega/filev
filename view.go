@@ -25,10 +25,21 @@ func startView(app *tview.Application, filesMap map[string]string) bool {
 		row++
 	}
 
+	form := tview.NewForm().
+		AddTextView(
+			"fileV",
+			"v1.0.0",
+			50,
+			50,
+			true,
+			false,
+		)
+
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
+		AddItem(form, 3, 3, false).
 		AddItem(inputField, 3, 1, false).
-		AddItem(table, 0, 10, true)
+		AddItem(table, 0, 100, true)
 
 	if err := app.SetRoot(flex, true).Run(); err != nil {
 		panic(err)
@@ -71,6 +82,7 @@ func configureTable(table *tview.Table, app *tview.Application, inputField *tvie
 
 	})
 
+	table.SetBorder(true).SetBorderColor(tcell.ColorWhiteSmoke)
 }
 
 func configureInputField(table *tview.Table, row int, filesMap map[string]string, app *tview.Application) *tview.InputField {
