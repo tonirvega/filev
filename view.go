@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -70,7 +68,9 @@ func configureTable(table *tview.Table, app *tview.Application, inputField *tvie
 
 			path := table.GetCell(table.GetSelection()).Text
 
-			app.Suspend(func() { openWithVim(path) })
+			app.Suspend(func() {
+				openWithVim(path)
+			})
 
 		}
 
@@ -87,19 +87,26 @@ func configureTable(table *tview.Table, app *tview.Application, inputField *tvie
 
 func configureInputField(table *tview.Table, row int, filesMap map[string]string, app *tview.Application) *tview.InputField {
 
-	inputField := tview.NewInputField().
+	inputField := tview.
+		NewInputField().
 		SetChangedFunc(func(text string) {
+
 			table.Clear()
 			row = 0
+
 			for path := range filesMap {
-				if text == "" || strings.Contains(strings.ToLower(path), strings.ToLower(text)) || strings.Contains(strings.ToLower(filesMap[path]), strings.ToLower(text)) {
+
+				if matchesFilter(path, text, filesMap[path]) {
+
 					table.SetCell(
 						row,
 						0,
-						tview.NewTableCell(path).
+						tview.
+							NewTableCell(path).
 							SetTextColor(tcell.ColorWhiteSmoke).
 							SetSelectable(true),
 					)
+
 					row++
 				}
 			}
@@ -107,9 +114,11 @@ func configureInputField(table *tview.Table, row int, filesMap map[string]string
 
 	inputField.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
+
 			app.SetFocus(table)
 
 			table.Select(0, 0)
+
 		}
 	})
 

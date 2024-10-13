@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func createFileMap(rootDir string) (map[string]string, error) {
@@ -42,6 +43,19 @@ func createFileMap(rootDir string) (map[string]string, error) {
 
 	return filesMap, nil
 
+}
+
+func matchesFilter(path, filter, content string) bool {
+
+	filter = sanitizeString(filter)
+
+	content = sanitizeString(content)
+
+	return strings.Contains(path, filter) || strings.Contains(content, filter) || filter == ""
+}
+
+func sanitizeString(s string) string {
+	return strings.TrimSpace(s)
 }
 
 func openWithVim(filePath string) {
