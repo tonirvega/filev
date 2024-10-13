@@ -51,7 +51,13 @@ func matchesFilter(path, filter, content string) bool {
 
 	content = sanitizeString(content)
 
-	return strings.Contains(path, filter) || strings.Contains(content, filter) || filter == ""
+	return strings.Contains(
+		strings.ToLower(path),
+		strings.ToLower(filter),
+	) || strings.Contains(
+		strings.ToLower(content),
+		strings.ToLower(filter),
+	) || filter == ""
 }
 
 func sanitizeString(s string) string {
