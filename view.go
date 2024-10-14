@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -144,11 +145,19 @@ func configureTable(table *tview.Table, app *tview.Application, inputField *tvie
 	})
 }
 
+var lastTiimeUserTyped time.Time = time.Now()
+
 func configureInputField(table *tview.Table, row int, filesMap map[string]string, app *tview.Application) *tview.InputField {
 
 	inputField := tview.
 		NewInputField().
 		SetChangedFunc(func(text string) {
+
+			now := time.Now()
+
+			if now.Sub(lastTiimeUserTyped) < 250*time.Millisecond {
+				return
+			}
 
 			if !strings.HasPrefix(text, ":") {
 
@@ -209,7 +218,7 @@ func configureInputField(table *tview.Table, row int, filesMap map[string]string
 
 	inputField.
 		SetBorder(true).
-		SetBorderColor(tcell.ColorWhiteSmoke)
+		SetBorderColor(tcell.ColorYellow)
 
 	inputField.SetLabel("> ")
 

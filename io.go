@@ -18,7 +18,7 @@ func createFileMap(rootDir string, ignoredPaths []string) (map[string]string, er
 			return err
 		}
 
-		if !info.IsDir() && !isIgnoredPath(path, ignoredPaths) {
+		if !info.IsDir() && !isIgnoredPath(path, ignoredPaths) && isNotASymlink(path) {
 
 			body, err := os.ReadFile(path)
 
@@ -78,4 +78,17 @@ func openWithVim(filePath string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Run()
+}
+
+func isNotASymlink(path string) bool {
+	info, err := os.Lstat(path)
+
+	if err != nil {
+
+		return false
+
+	}
+
+	return info.Mode()&os.ModeSymlink == 0
+
 }
