@@ -6,7 +6,7 @@ import (
 
 func TestCreateFileMap(t *testing.T) {
 
-	filesMap, err := createFileMap("tests/fixtures/testdata")
+	filesMap, err := createFileMap("tests/fixtures/testdata", []string{})
 
 	if err != nil {
 
