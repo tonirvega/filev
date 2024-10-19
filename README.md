@@ -1,3 +1,4 @@
+[![PR Verify](https://github.com/tonirvega/filev/actions/workflows/pr_verify.yml/badge.svg)](https://github.com/tonirvega/filev/actions/workflows/pr_verify.yml)
 # filev
 Manage your files via terminal
 
